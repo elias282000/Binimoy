@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/auth_service.dart';
+import 'saree_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final AuthService authService;
@@ -111,8 +112,14 @@ class _HomeScreenState extends State<HomeScreen> {
               final saree = sarees[index].data() as Map<String, dynamic>;
               
               return GestureDetector(
+                // In home_screen.dart, update the GestureDetector's onTap
                 onTap: () {
-                  // TODO: Navigate to detail screen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SareeDetailScreen(saree: saree),
+                    ),
+                  );
                 },
                 child: Card(
                   elevation: 2,
