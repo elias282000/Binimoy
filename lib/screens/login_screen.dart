@@ -16,28 +16,38 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
 
   void _handleLogin() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-      
-      try {
-        final result = await AuthService().signInWithEmailAndPassword(
-          _emailController.text,
-          _passwordController.text,
+    if (!_formKey.currentState!.validate()) return;
+    
+    if (!mounted) return;
+    setState(() => _isLoading = true);
+    
+    try {
+      final result = await AuthService().signInWithEmailAndPassword(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
+
+      if (!mounted) return;
+
+      if (result != null) {
+        // Use pushNamedAndRemoveUntil to clear the navigation stack
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/home',
+          (route) => false,
         );
-
-        if (!mounted) return;
-
-        if (result != null) {
-          Navigator.pushReplacementNamed(context, '/home');
-        }
-      } on FirebaseAuthException catch (e) {
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message ?? 'Login failed. Please try again.')),
+          const SnackBar(content: Text('Login failed. Please try again.')),
         );
-      } finally {
-        if (mounted) {
-          setState(() => _isLoading = false);
-        }
+      }
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? 'Login failed. Please try again.')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
       }
     }
   }
