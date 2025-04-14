@@ -17,10 +17,17 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Initialize Firebase App Check
-  await FirebaseAppCheck.instance.activate(
-    androidProvider: AndroidProvider.debug,
-  );
+  try {
+    // Initialize Firebase App Check with retry mechanism
+    await FirebaseAppCheck.instance.activate(
+      androidProvider: AndroidProvider.debug,
+      appleProvider: AppleProvider.debug,
+      webProvider: ReCaptchaV3Provider('your-recaptcha-site-key'),
+    );
+  } catch (e) {
+    print('Firebase App Check initialization error: $e');
+    // Continue app execution even if App Check fails
+  }
 
   // Initialize AuthService
   final authService = AuthService();

@@ -19,4 +19,21 @@ class StorageService {
       throw 'Failed to upload image';
     }
   }
+
+  Future<String> uploadProfileImage(File imageFile, String userId) async {
+    try {
+      final response = await cloudinary.uploadFile(
+        CloudinaryFile.fromFile(
+          imageFile.path,
+          resourceType: CloudinaryResourceType.Image,
+          folder: 'profile_images',
+          publicId: userId, // Use userId as publicId for easy updates
+        ),
+      );
+      return response.secureUrl;
+    } catch (e) {
+      print('Error uploading profile image: $e');
+      throw 'Failed to upload profile image';
+    }
+  }
 }

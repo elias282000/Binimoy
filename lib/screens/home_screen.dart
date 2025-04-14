@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/auth_service.dart';
 import 'saree_detail_screen.dart';
 import 'add_post_screen.dart';
+import 'profile_screen.dart';
+import 'wardrobe_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final AuthService authService;
@@ -194,13 +196,18 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
         onTap: (index) {
           if (index == 1) {
-            // Navigate to Add Post screen
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const AddPostScreen()),
             );
+          } else if (index == 2) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProfileScreen(authService: widget.authService),
+              ),
+            );
           }
-          // TODO: Handle other navigation items
         },
       ),
     );
