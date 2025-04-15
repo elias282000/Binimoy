@@ -4,6 +4,8 @@ import '../services/auth_service.dart';
 import 'saree_detail_screen.dart';
 import 'add_post_screen.dart';
 import 'profile_screen.dart';
+import 'search_screen.dart';
+import 'transaction_history_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final AuthService authService;
@@ -40,7 +42,10 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
-              // TODO: Implement search functionality
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SearchScreen()),
+              );
             },
           ),
           IconButton(
@@ -53,6 +58,17 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.logout),
             onPressed: _handleSignOut,
             tooltip: 'Sign Out',
+          ),
+          IconButton(
+            icon: const Icon(Icons.receipt_long),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const TransactionHistoryScreen(),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -111,10 +127,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             itemCount: sarees.length,
             itemBuilder: (context, index) {
-              final saree = sarees[index].data() as Map<String, dynamic>;
-              
+              final saree = {
+                ...sarees[index].data() as Map<String, dynamic>,
+                'id': sarees[index].id, // Add document ID
+              };
+
               return GestureDetector(
-                // In home_screen.dart, update the GestureDetector's onTap
                 onTap: () {
                   Navigator.push(
                     context,
