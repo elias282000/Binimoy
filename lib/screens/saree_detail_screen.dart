@@ -2,6 +2,43 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/rental_calendar.dart';
+import '../widgets/review_dialog.dart';
+import '../screens/chat_screen.dart';
+
+class Review {
+  final String id;
+  final String userId;
+  final String userName;
+  final String targetId;
+  final String targetType;
+  final int rating;
+  final String comment;
+  final DateTime createdAt;
+
+  Review({
+    required this.id,
+    required this.userId,
+    required this.userName,
+    required this.targetId,
+    required this.targetType,
+    required this.rating,
+    required this.comment,
+    required this.createdAt,
+  });
+
+  factory Review.fromMap(Map<String, dynamic> map, String id) {
+    return Review(
+      id: id,
+      userId: map['userId'] ?? '',
+      userName: map['userName'] ?? '',
+      targetId: map['targetId'] ?? '',
+      targetType: map['targetType'] ?? '',
+      rating: map['rating'] ?? 0,
+      comment: map['comment'] ?? '',
+      createdAt: (map['createdAt'] as Timestamp).toDate(),
+    );
+  }
+}
 
 enum TransactionType { buy, rent, swap }
 enum TransactionStatus { pending, approved, rejected }
@@ -126,8 +163,30 @@ class _SareeDetailScreenState extends State<SareeDetailScreen> {
                           ),
                         ),
                       ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChatScreen(
+                                  receiverId: widget.saree['userId'],
+                                  receiverName: widget.saree['userName'],
+                                ),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                          ),
+                          child: const Text('Chat with Seller'),
+                        ),
+                      ),
                     ],
                   ),
+                  const SizedBox(height: 24),
+                  _buildReviewsSection(),
                 ],
               ),
             ),
@@ -280,6 +339,87 @@ class _SareeDetailScreenState extends State<SareeDetailScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildReviewsSection() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('reviews')
+          .where('targetId', isEqualTo: widget.saree['id'])
+          .where('targetType', isEqualTo: 'saree')
+          .orderBy('createdAt', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final reviews = snapshot.data?.docs ?? [];
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ListTile(
+              title: const Text('Reviews'),
+              trailing: IconButton(
+                icon: const Icon(Icons.rate_review),
+                onPressed: () async {
+                  final result = await showDialog(
+                    context: context,
+                    builder: (context) => ReviewDialog(
+                      targetId: widget.saree['id'],
+                      targetType: 'saree',
+                    ),
+                  );
+                  if (result == true) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Review submitted successfully')),
+                    );
+                  }
+                },
+              ),
+            ),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: reviews.length,
+              itemBuilder: (context, index) {
+                final review = Review.fromMap(
+                  reviews[index].data() as Map<String, dynamic>,
+                  reviews[index].id,
+                );
+
+                return ListTile(
+                  leading: const CircleAvatar(
+                    child: Icon(Icons.person),
+                  ),
+                  title: Row(
+                    children: [
+                      Text(review.userName),
+                      const SizedBox(width: 8),
+                      Row(
+                        children: List.generate(5, (index) {
+                          return Icon(
+                            index < review.rating ? Icons.star : Icons.star_border,
+                            color: Colors.amber,
+                            size: 16,
+                          );
+                        }),
+                      ),
+                    ],
+                  ),
+                  subtitle: Text(review.comment),
+                  trailing: Text(
+                    review.createdAt.toString().split(' ')[0],
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
