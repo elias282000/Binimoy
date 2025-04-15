@@ -10,13 +10,16 @@ class StorageService {
         CloudinaryFile.fromFile(
           imageFile.path,
           resourceType: CloudinaryResourceType.Image,
-          folder: 'saree_images',
+          folder: 'profile_images',
         ),
+        // Using uploadPreset instead of transformations
+        // The transformations should be configured in your Cloudinary upload preset
+        uploadPreset: 'Binimoy_saree_image',
       );
       return response.secureUrl;
     } catch (e) {
-      print('Error uploading image: $e');
-      throw 'Failed to upload image';
+      print('Cloudinary upload error: $e');
+      throw 'Failed to upload image: ${e.toString()}';
     }
   }
 }

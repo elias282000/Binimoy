@@ -12,19 +12,16 @@ import 'services/auth_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Firebase with proper options
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Initialize Firebase App Check
+  // Update App Check configuration
   await FirebaseAppCheck.instance.activate(
-    androidProvider: AndroidProvider.debug,
+    androidProvider: AndroidProvider.playIntegrity,
   );
 
-  // Initialize AuthService
   final authService = AuthService();
-  
   runApp(MyApp(authService: authService));
 }
 
