@@ -2,9 +2,11 @@ import 'dart:io';
 import 'package:cloudinary_public/cloudinary_public.dart';
 
 class StorageService {
-  final cloudinary = CloudinaryPublic('dwdtzllyy', 'Binimoy_saree_image', cache: false);
+  final cloudinary =
+      CloudinaryPublic('dwdtzllyy', 'Binimoy_saree_image', cache: false);
 
-  Future<String> uploadImage(File imageFile) async {
+  Future<String> uploadImage(File imageFile,
+      {Function(double)? onProgress}) async {
     try {
       final response = await cloudinary.uploadFile(
         CloudinaryFile.fromFile(
@@ -12,9 +14,12 @@ class StorageService {
           resourceType: CloudinaryResourceType.Image,
           folder: 'profile_images',
         ),
-        // Using uploadPreset instead of transformations
-        // The transformations should be configured in your Cloudinary upload preset
         uploadPreset: 'Binimoy_saree_image',
+        onProgress: (count, total) {
+          if (onProgress != null) {
+            onProgress(count / total);
+          }
+        },
       );
       return response.secureUrl;
     } catch (e) {
