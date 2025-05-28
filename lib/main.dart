@@ -55,6 +55,13 @@ class MyApp extends StatelessWidget {
             scaffoldBackgroundColor: Colors.white,
             // Make text scale responsive
             textTheme: Typography.englishLike2018.apply(fontSizeFactor: 1.sp),
+            // Add app bar theme
+            appBarTheme: AppBarTheme(
+              centerTitle: true,
+              titleSpacing: 0,
+              backgroundColor: Colors.white,
+              elevation: 0,
+            ),
           ),
           home: child,
           routes: {
